@@ -1,0 +1,272 @@
+package BSstree;
+
+import java.util.Queue;
+
+public class BSstree {
+   private Node head;
+
+   private static Node next;
+   
+   private static class Node {			//This class contain the variable for data moving right and left to the tree.
+       int data;
+       Node right;
+       Node left;
+       
+       public Node(int data, Node left, Node right) {		//Function, which holds data, first and second element of the list.
+           this.data = data;
+           this.right = right;
+           this.left = left;
+                    
+       }
+   }
+
+   public void setup() {		//This function contains leaves.
+
+       Node first = new Node(15, null, null);
+       Node second = new Node(25, null, null);
+       Node third = new Node(30, null, null);
+
+       Node pos1 = new Node(60, first, second);
+       Node pos2 = new Node(65, third, null);
+
+       head = new Node(45, pos1, pos2);
+   }
+
+   public void setup2() {
+
+       Node first = new Node(15, null, null);
+       Node second = new Node(25, null, null);
+       Node third = new Node(30, null, null);
+
+       Node pos1 = new Node(60, first, second);
+       Node pos2 = new Node(65, third, null);
+
+       next = new Node(45, pos1, pos2);
+   }
+
+  
+
+   private int count(Node t) {	//This class is checking the condition weather the t is empty or not.  
+       if (t == null)
+    	   
+           return (Integer) null;
+      
+       	
+       else {
+    	   
+           return t.data + count(t.left) 
+           + count(t.right);
+           
+       }
+   }
+
+   public int add() {
+       return count(head);
+   }
+
+   public int nodeCount() {
+       return nodeCount(head);
+   }
+   
+   private int nodeCount(Node t) {
+       if (t == null)	//Checking the conditions for t.
+           return 0;
+       else {
+           return 1 + nodeCount(t.left) + 
+           nodeCount(t.right);
+       }
+   }
+
+   //From here the actual classes which is given by the professor starts from here.
+   
+   
+   
+   public boolean isFull() {
+       return isFull(head);
+   }
+ //This will tell the three is full or not.
+
+   private boolean isFull(Node root) {	
+       if (root == null)
+           return true;
+
+      
+       if (root.left == null && root.right == null)
+           return true;
+
+       if ((root.left != null) && (root.right != null))
+           return (isFull(root.left) && isFull(root.right));
+
+       return false;
+   }
+
+   public boolean equals() {
+       return equals(head, next);
+   }
+
+   private boolean equals(Node num1, Node num2) {
+
+  
+       if (num1 == null && num2 == null)
+           return true;
+
+       if (num1 != null && num2 != null)
+           return (num1.data == num2.data && equals(num1.left, num2.left) && equals(num1.right, num2.right));
+
+       return false;
+   }
+
+   
+
+   private Node mirror(Node root) {
+       if (root == null)
+           return root;
+
+       Node n = mirror(root.left);
+       Node m = mirror(root.right);
+
+       root.left = m;
+       root.right = n;
+
+       return root;
+   }
+
+   public Node mirror() {
+       return mirror(head);
+   }
+
+   public void printLevels() {
+       printLevels(head);
+   }
+
+   private void printLevels(Node root) {
+       Queue<Node> elements = new java.util.LinkedList<Node>();
+       
+       //Using queue which has an ability to shrink or grow list.
+       
+       if (root == null) {
+           return;
+       }
+       elements.add(root);
+       for (int x = 0; elements.size() > 0; x++) {
+           Node a = elements.poll();
+           System.out.print(a.data + " ");
+           if (a.left != null)
+               elements.add(a.left);
+           if (a.right != null)
+               elements.add(a.right);
+
+       }
+   }
+   
+   public boolean isSameStructure() {
+       return equals(head, next);
+   }
+
+   public boolean isSameStructure(Node beg1, Node beg2) {
+       if (beg1 == null && beg2 == null)
+           return true;
+
+       if (beg1 == null || beg2 == null)
+           return false;
+
+       if (beg1.data != beg2.data)
+           return false;
+
+       return (isSameStructure(beg1.left, beg2.left) 
+       && isSameStructure(beg1.right, beg2.right))
+       || (isSameStructure(beg1.left, beg2.right) 
+       && isSameStructure(beg1.right, beg2.left));
+   }
+
+   
+
+   public boolean isMirror() {
+       return isMirror(head, next);
+   }
+   
+   boolean isMirror(Node root1, Node root2) {
+
+       if (root1 == null && root2 == null)
+           return true;
+
+       if (root1 == null || root2 == null)
+           return false;
+
+       return root1.data == root1.data && isMirror(root1.left, root2.right) 
+       && isMirror(root1.right, root2.left);
+   }
+
+   
+
+   
+   public Node rightrotation() {		//For right rotation.
+       return rotateRight(head);
+   }
+   
+   private Node rotateRight(Node root) {
+       Node a = root.left;
+       Node a2 = a.right;
+
+       a.right = root;
+       root.left = a2;
+
+       return a;
+   }
+
+   
+   
+   public Node leftrotation() {			//For left rotation.
+       return rotateLeft(head);
+   }
+   
+   private Node rotateLeft(Node root) {		
+       Node b = root.right;
+       Node b2 = b.left;
+
+       b.left = root;
+       root.right = b2;
+
+       return b;
+   }
+
+   
+
+   
+
+   public static void main(String[] args) {
+
+       BSstree tree = new BSstree();		//Object for the class.
+       tree.setup();
+
+       BSstree bs = new BSstree();
+       bs.setup2();
+
+       System.out.println("Total number of nodes: "		//This line will give the CountNodes.
+       + tree.nodeCount());
+
+       System.out.println("\nTree is full? " 			//This line will tell the tree is full or not.
+       + tree.isFull());
+       
+       System.out.println("\nTree is equal? "			
+       + tree.equals());
+
+       System.out.println("\nTree structure is same? "
+       + tree.isSameStructure());
+       
+       System.out.println("\nMirror tree: " 
+    	       + tree.isMirror());
+    	       tree.mirror();
+
+       System.out.println("\nDisplaying elements: ");		//This line will display all the elements.
+       tree.printLevels();
+       
+       System.out.println("\n\nEnd of the binary search tree :) ");
+   
+       tree.head = tree.leftrotation();  //This is rotating left.
+            
+       tree.head = tree.rightrotation();	//This is rotating right.
+
+   }
+
+}
