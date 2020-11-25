@@ -1,1 +1,529 @@
+package src;
 
+import java.awt.BorderLayout;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import java.util.Stack;
+import javax.swing.BorderFactory;
+import javax.swing.SwingConstants;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import java.awt.Color;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
+
+//DisjSets class
+//
+//CONSTRUCTION: with int representing initial number of sets
+//
+//******************PUBLIC OPERATIONS*********************
+//void union( root1, root2 ) --> Merge two sets
+//int find( x )              --> Return set containing x
+//******************ERRORS********************************
+//No error checking is performed
+
+/**
+* Disjoint set class, using union by rank and path compression.
+* Elements in the set are numbered starting at 0.
+* @author Mark Allen Weiss
+*/
+class DisjSets
+{
+ /**
+  * Construct the disjoint sets object.
+  * @param numElements the initial number of disjoint sets.
+  */
+ public DisjSets( int numElements )
+ {
+     s = new int [ numElements ];
+     for( int i = 0; i < s.length; i++ )
+         s[ i ] = -1;
+ }
+
+ /**
+  * Union two disjoint sets using the height heuristic.
+  * For simplicity, we assume root1 and root2 are distinct
+  * and represent set names.
+  * @param root1 the root of set 1.
+  * @param root2 the root of set 2.
+  */
+ public void union( int root1, int root2 )
+ {
+     if( s[ root2 ] < s[ root1 ] )  // root2 is deeper
+         s[ root1 ] = root2;        // Make root2 new root
+     else
+     {
+         if( s[ root1 ] == s[ root2 ] )
+             s[ root1 ]--;          // Update height if same
+         s[ root2 ] = root1;        // Make root1 new root
+     }
+ }
+
+ /**
+  * Perform a find with path compression.
+  * Error checks omitted again for simplicity.
+  * @param x the element being searched for.
+  * @return the set containing x.
+  */
+ public int find( int x )
+ {
+     if( s[ x ] < 0 )
+         return x;
+     else
+         return s[ x ] = find( s[ x ] );
+ }
+
+ private int [ ] s;
+
+
+ // Test main; all finds on same output line should be identical
+ public static void main( String [ ] args )
+ {
+     int NumElements = 128;
+     int NumInSameSet = 16;
+
+     DisjSets ds = new DisjSets( NumElements );
+     int set1, set2;
+
+     for( int k = 1; k < NumInSameSet; k *= 2 )
+     {
+         for( int j = 0; j + k < NumElements; j += 2 * k )
+         {
+             set1 = ds.find( j );
+             set2 = ds.find( j + k );
+             ds.union( set1, set2 );
+         }
+     }
+
+     for( int i = 0; i < NumElements; i++ )
+     {
+         System.out.print( ds.find( i )+ "*" );
+         if( i % NumInSameSet == NumInSameSet - 1 )
+             System.out.println( );
+     }
+     System.out.println( );
+ }
+}
+
+
+//Class
+public class Maze{
+	
+	//Declaring variables
+    private int forRow;
+    private int forCol;
+    private int num;
+    private DisjSets disjointSet;
+    private Node[][] data;
+    private List<Edges> edge;
+    private String str;
+    Edges ver=new Edges(1,1,EdgeType.eVertical);
+    Edges eHorizontal=new Edges(0,0,EdgeType.eHorizontal);
+    Edges VISITED=new Edges(0,0,EdgeType.eHorizontal);
+    
+    
+   
+    //Method starts from here.
+    public void mazeGetter()
+    {
+        //Calling these functions.
+        beg();
+        
+        forMaze();
+        
+        displayingMaze();
+       
+        str=null;
+    }
+    
+  //Constructor
+    public Maze(int forRow,int forCol)
+    {
+        //Initializing the variables for rows and columns.
+        this.forRow = forRow;
+        this.forCol = forCol;
+        this.num = forRow*forCol;
+    }
+   
+    //Method
+    public void mazeGetter(int forRow,int forCol){
+        //Declaring
+        this.forRow=forRow;
+        this.forCol=forCol;
+        this.num=forRow*forCol;
+       
+        //Calling Functions below.
+        beg();
+        forMaze();
+        updateMaze();
+        str=null;
+    }
+   
+    
+   
+    //Method starts from here.
+    private void beg(){
+        //Initialize
+    	data=new Node[forRow][forCol];
+        edge=new LinkedList<Edges>();
+        disjointSet=new DisjSets(forRow*forCol);
+        
+       
+        //Nested loop for rows and columns.
+        int x = 0;
+        while(x<forRow){
+            int y = 0;
+            while(y<forCol){
+                //Update
+                data[x][y]=new Node(String.valueOf(x*forCol+y),x,y);
+                
+                y++;}
+            x++;}
+       
+        //While loop for columns
+        int y = 0;
+        while(y<forCol)
+        {
+            
+            data[0][y].upward=eHorizontal;
+            data[forRow-1][y].downward=eHorizontal;
+            
+            y++;
+        }
+       
+        //While loop for rows.
+        int a = 0;
+        while(a<forRow)
+        {
+            
+            data[a][0].left=ver;
+            data[a][forCol-1].right=ver;
+            
+            a++;
+        }
+       
+        //While loop for iterating rows & columns.
+        
+        int b = 0;
+        while(b<forRow-1)
+        {
+            int c = 0;
+            while(c<forCol)
+            {
+                //Update
+                data[b][c].downward=new Edges(b*forCol+c,(b+1)*forCol+c,EdgeType.eHorizontal);
+                data[b+1][c].upward=data[b][c].downward;
+                edge.add(data[b][c].downward);
+                
+                c++;
+            }
+            
+            b++;
+        }
+       
+        
+        int d = 0;
+        while(d<forCol-1)
+        {
+            int e = 0;
+            while(e<forRow)
+            {            
+            	
+                data[e][d].right=new Edges(e*forCol+d,e*forCol+d+1,EdgeType.eVertical);
+                data[e][d+1].left=data[e][d].right;
+                edge.add(data[e][d].right);
+                e++;
+            }
+            d++;
+        }
+    }
+   
+    //Method starts from here for Maze.
+    private void forMaze()
+    {
+        
+        Random randnum=new Random();		//Creating a random numbers.
+      
+        while(!edge.isEmpty()){					//Starting a while loop.
+            
+            int ind = randnum.nextInt(edge.size());		
+            
+            Edges rmv = edge.remove(ind);
+            int side1 = rmv.side1;				//For Boundries
+            int side2 = rmv.side2;					//For Boundries
+            int base1 = disjointSet.find(side1);		//For Root
+            int base2 = disjointSet.find(side2);		//For Root
+           
+            //Checking the conditions for root with the help of if & else statement.
+            if(base1 != base2){
+            
+                //calling function.
+                disjointSet.union(base1, base2);
+           
+                if(rmv.etype==EdgeType.eVertical){
+                
+                    data[side1/forCol][side1%forCol].right=null;
+                    data[side2/forCol][side2%forCol].left=null;
+                }
+               
+               else{
+                    //Update
+                    data[side1/forCol][side1%forCol].downward=null;
+                    data[side2/forCol][side2%forCol].upward=null;
+                }
+            }
+        }
+       
+        data[0][0].upward=null;
+        data[forRow-1][forCol-1].downward=null;}
+   
+    
+    JFrame frame = new JFrame("Welcome to the Maze");		//jFrame.
+    JPanel num1 = new JPanel();					//Jpanel.
+   
+    private void updateMaze(){
+        frame.remove(num1);
+        num1=new JPanel();
+        frame.add(BorderLayout.CENTER,num1);
+        num1.setLayout(new GridLayout(forRow, forCol));
+       
+        int f = 0;
+        while(f<forRow)
+        {
+            int k = 0;
+            while(k<forCol)
+            {
+            	int right = 1, left = 1, upward = 1, downward = 1;		//Declaring Variables
+                String val=data[f][k].displaying;
+                JLabel jlabel=new JLabel(val);
+                jlabel.setHorizontalAlignment(SwingConstants.CENTER);
+                
+                
+               
+                //Checking conditions for the directions with the help of if & else statements.
+                if(data[f][k].upward==null){			
+                    upward=0;
+                }
+               
+                else if(data[f][k].upward==eHorizontal){
+                    
+                    upward=2;
+                }
+               
+                
+                if(data[f][k].left==null){
+                
+                    
+                    left=0;
+                }
+               
+                else if(data[f][k].left==ver) {
+                
+                    left=2;
+                }
+               
+                if(data[f][k].downward==null){
+                    downward=0;
+                }
+               
+                else if(data[f][k].downward==eHorizontal){
+                
+                    downward=2;
+                }
+               
+                if(data[f][k].right==null){
+                
+                    right=0;
+                }
+               
+                else if(data[f][k].right==ver){
+                
+                	right=2;
+                }
+                jlabel.setBorder(BorderFactory.createMatteBorder(upward, left, downward, right, Color.BLACK));
+                num1.add(jlabel);
+                
+                k++;
+            }
+            f++;
+        }
+        frame.setVisible(true);
+    }
+   
+    //Method for displaying maze.
+    private void displayingMaze(){
+        frame.setSize(700, 700);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLayout(new BorderLayout());
+        JPanel north=new JPanel();							
+        frame.add(BorderLayout.NORTH,north);
+        final JTextArea result = new JTextArea();
+        result.setColumns(10);
+        result.setRows(3);
+        result.setAutoscrolls(true);
+        final JTextField rows = new JTextField(String.valueOf(forRow));
+        
+        rows.setSize(100, 20);
+        final JTextField col = new JTextField(String.valueOf(forCol));
+        col.setSize(80, 30);
+        JButton create = new JButton("Hit to generate");	//This line is for the button.
+        north.add(rows);
+        north.add(col);
+        north.add(create);
+        
+      
+        create.addActionListener(new ActionListener(){           
+            
+            public void actionPerformed(ActionEvent e){               
+                
+                result.setText("");
+                mazeGetter(Integer.valueOf(rows.getText()), Integer.valueOf(col.getText()));}
+        });
+       
+        //Initialize
+        frame.add(BorderLayout.EAST,new JLabel("    "));
+        frame.add(BorderLayout.WEST,new JLabel("    "));
+        frame.add(BorderLayout.CENTER,num1);
+        JPanel south = new JPanel();
+        frame.add(BorderLayout.SOUTH,south);
+        JButton showSolution = new JButton("show solution");
+        south.add(showSolution);
+        south.add(result);
+       
+        //ActionListener()
+        showSolution.addActionListener(new ActionListener(){
+            
+            @Override
+            public void actionPerformed(ActionEvent e){
+                String solutionStr= getSolution();
+                result.setText(solutionStr);}
+        });
+       
+        
+        updateMaze();}						//Calling function
+    
+    //Method getSolution()
+    public String getSolution(){
+        
+        if(null == str){					//Checking condition
+        
+            Stack<Node> stack = new Stack<Node>();
+            stack.add(data[forRow-1]
+            		[forCol-1]);
+            data[forRow-1]
+            		[forCol-1].downward = VISITED;
+            
+            while(!stack.isEmpty() && stack.peek()!=data[0][0]){
+            	
+                Node beggining = stack.peek();
+               
+                //Check condition
+                if(null==beggining.upward){				//Checking the Condition.
+                	
+                    stack.push(data[beggining.p-1][beggining.q]);
+                    beggining.upward=VISITED;
+                    data[beggining.p-1][beggining.q].downward=VISITED;}
+               
+                //For condition
+                else if(null==beggining.left){
+                    stack.push(data[beggining.p][beggining.q-1]);
+                    beggining.left=VISITED;
+                    data[beggining.p][beggining.q-1].right=VISITED;}
+               
+                //for condition
+                else if(null==beggining.downward){
+                    
+                    stack.push(data[beggining.p+1][beggining.q]);
+                    beggining.downward=VISITED;
+                    data[beggining.p+1][beggining.q].upward=VISITED;}
+               
+                //for condition
+                else if(null==beggining.right){
+                    
+                    stack.push(data[beggining.p][beggining.q+1]);
+                    beggining.right=VISITED;
+                    data[beggining.p][beggining.q+1].left=VISITED;}
+               
+                //if the above condition is false then it will go with the else part.
+                else
+                {
+                    
+                    stack.pop();}
+            }
+           
+            //for condition
+            if(stack.isEmpty()){
+                //Return
+                return "Ooops error occured: ";}
+           
+            StringBuilder result = new StringBuilder();
+            int num2 = 0;
+           
+            //While Loop
+            while(stack.peek()!=data[forRow-1][forCol-1]){
+                
+                result.append(stack.pop().displaying).append(", ");
+               
+                //Checking the condition
+                if(++num2%10 == 0){
+                    result.append("\n");}
+            }
+           
+            result.append(stack.pop().displaying);
+            str = result.toString();
+           
+            return result.toString();}
+        return str;}
+   
+    
+    private static enum EdgeType{				//Enumurator
+        //Variables
+        eVertical,
+        eHorizontal;}
+   
+  //Class for border
+    
+    private static class Edges{			
+      
+        int side1, side2;
+        EdgeType etype;
+       
+        
+        public Edges(int side1,int side2,EdgeType etype){		//Constructor
+          
+            this.side1=side1;
+            this.side2=side2;
+            this.etype=etype;
+        }
+    }
+   
+    //Class for node
+    private static class Node{
+        
+        String displaying;
+        Edges upward,left, downward, right;
+        int p;
+        int q;
+       
+        public Node(String displaying,int p,int q){
+            
+            this.displaying = displaying;
+            this.p = p;
+            this.q = q;
+        }
+    }
+
+    //Driver
+    public static void main(String[] args){
+        Maze maze = new Maze(20, 20);
+       
+         maze.mazeGetter();			//Calling Function
+    }
+}
