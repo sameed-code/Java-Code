@@ -43,18 +43,18 @@ class Student{
 	/*This Method get the input from the user and then 
 	get 20% of that grade.*/
 	public int quizAvg() {
-		System.out.println("\nPlease Enter your Quizz Scores! ");
+		System.out.println("\nPlease Enter your Quiz Scores! ");
 		
 		Scanner scan1 = new Scanner(System.in);
 		System.out.println("Enter Your First Quiz Score: ");
 		double num1 = scan1.nextInt();
 		
 		Scanner scan2 = new Scanner(System.in);
-		System.out.println("Enter Your First Quiz Score: ");
+		System.out.println("Enter Your Second Quiz Score: ");
 		double num2 = scan2.nextInt();
 		
 		Scanner scan3 = new Scanner(System.in);
-		System.out.println("Enter Your First Quiz Score: ");
+		System.out.println("Enter Your Third Quiz Score: ");
 		double num3 = scan3.nextInt();
 		
 		//Storing all three "quizzes" score and getting the 20% of that in "result" variable.
